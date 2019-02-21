@@ -24,6 +24,7 @@
 \setlist[enumerate]{leftmargin=*}
 \bibpunct{}{}{;}{a}{,}{,~}
 \renewcommand{\thefootnote}{\arabic{footnote}}
+\renewcommand\theequation{\thesection.\arabic{equation}}
 
 
 \begin{document}
@@ -53,7 +54,7 @@
 	\begin{tabular}{l p{10.5cm}}
 		\textbf{Toolbox URL:} & \url{https://github.com/JoramSoch/cvLME} \\
 		\textbf{Support Contact:} & Joram Soch $\left\langle\right.$\url{joram.soch@bccn-berlin.de}$\left.\right\rangle$  \\
-		\textbf{Current Version:} & cvLME V0.1.1 \\
+		\textbf{Current Version:} & cvLME V0.2.2 [V0.languages.models] \\
 		\textbf{Related Paper:} & Soch J, Allefeld C (2018). MACS -- a new SPM toolbox \linebreak[4]for model assessment, comparison and selection. \textit{Journal of \linebreak[4]Neuroscience Methods}, vol. 306, pp. 19-31; DOI: 10.1016/\linebreak[4]j.jneumeth.2018.05.017. \\
 	\end{tabular}
 \end{center}
@@ -62,8 +63,8 @@
 
 
 %%% Contents %%%
-\pagebreak
 \setstretch{1.0}
+\pagebreak
 \tableofcontents
 
 
@@ -71,9 +72,9 @@
 %%% Text %%%
 \pagebreak
 \pagenumbering{arabic}
-\renewcommand\theequation{\thesection.\arabic{equation}}
 
 \include{MS}
+\include{GLM}
 
 
 \end{document}

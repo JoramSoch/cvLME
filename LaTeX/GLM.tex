@@ -1,0 +1,277 @@
+% Univariate General Linear Model
+% _
+% Author: Joram Soch, BCCN Berlin
+% E-Mail: joram.soch@bccn-berlin.de
+% Edited: 21/02/2019, 12:30
+
+
+\setcounter{equation}{0}
+\section{Univariate General Linear Model} \label{sec:GLM}
+
+\subsection{Likelihood function} \label{sec:GLM-LF}
+
+In the univariate general linear model (GLM), a single measured signal ($y$) is modelled as a linear combination ($\beta$) of predictor variables ($X$), where errors ($\varepsilon$) are assumed to be normally distributed around zero and to have a known covariance structure ($V$), but unknown variance factor ($\sigma^2$):
+
+\begin{equation} \label{eq:GLM}
+y = X \beta + \varepsilon, \; \varepsilon \sim \mathrm{N}(0, \sigma^2 V) \; .
+\end{equation}
+
+In this equation, $y$ is the $n \times 1$ measured signal, $X$ is the $n \times p$ design matrix, $\beta$ is a $p \times 1$ vector of regression coefficients, $\varepsilon$ is an $n \times 1$ vector of errors, $\sigma^2$ is the variance of these errors and $V$ is an $n \times n$ correlation matrix where $n$ is the number of data points and $p$ ist the number of regressors.
+
+The GLM equation (\ref{eq:GLM}) implies the following \textit{likelihood function}
+
+\begin{equation} \label{eq:GLM-LF-class}
+p(y|\beta,\sigma^2) = \mathrm{N}(y; X \beta, \sigma^2 V) = \sqrt{\frac{|\tau P|}{(2 \pi)^n}} \, \exp\left[ -\frac{\tau}{2} (y-X\beta)^T P (y-X\beta) \right]
+\end{equation}
+
+which, for mathematical convenience, can also be parametrized as
+
+\begin{equation} \label{eq:GLM-LF-Bayes}
+p(y|\beta,\tau) = \mathrm{N}(y; X \beta, (\tau P)^{-1}) = \sqrt{\frac{|\tau P|}{(2 \pi)^n}} \, \exp\left[ -\frac{\tau}{2} (y-X\beta)^T P (y-X\beta) \right]
+\end{equation}
+
+using the residual precision $\tau = 1/\sigma^2$ and the $n \times n$ precision matrix $P = V^{-1}$.
+
+
+\subsection{Maximum likelihood} \label{sec:GLM-MLE}
+
+Classical model estimation proceeds by maximizing the \textit{log-likelihood} (LL)
+
+\begin{equation} \label{eq:GLM-LL}
+\mathrm{LL}(\beta,\sigma^2) = \log p(y|\beta,\sigma^2) = - \frac{n}{2} \log(2\pi) - \frac{1}{2} \log \left| \sigma^2 V \right| - \frac{1}{2} (y - X\beta)^T (\sigma^2 V)^{-1} (y - X\beta)
+\end{equation}
+
+which gives rise to \textit{maximum-likelihood} (ML) parameter estimates
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:GLM-MLE}
+\begin{split}
+\hat{\beta} &= (X^T V^{-1} X)^{-1} X^T V^{-1} y \\
+\hat{\sigma}^2 &= \frac{1}{n} (y - X\hat{\beta})^T V^{-1} (y - X\hat{\beta})
+\end{split}
+\end{equation}
+
+that can be used to form $t$- and $F$-statistics
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:GLM-tF}
+\begin{split}
+t &= \frac{c^T \hat{\beta}}{\sqrt{\hat{\sigma}^2 c^T \mathrm{cov}(\hat{\beta}) c}} \\
+F &= (C^T \hat{\beta})^T (\hat{\sigma}^2 C^T \mathrm{cov}(\hat{\beta}) C)^{-1} (C^T \hat{\beta})
+\end{split}
+\end{equation}
+
+where $c$ is a $p \times 1$ \textit{contrast vector}, $C$ is a $p \times q$ \textit{contrast matrix} and
+
+\begin{equation} \label{eq:GLM-cov-beta-est}
+\mathrm{cov}(\hat{\beta}) = (X^T V^{-1} X)^{-1} \; .
+\end{equation}
+
+
+\subsection{Prior distribution} \label{sec:GLM-NG-prior}
+
+A conjugate prior distribution relative to the likelihood function given by (\ref{eq:GLM-LF-Bayes}) is the \textit{normal-gamma distribution} over regression coefficients $\beta$ and residual precision $\tau$
+
+\begin{equation} \label{eq:GLM-NG-prior}
+p(\beta,\tau) = \mathrm{N}(\beta; \mu_0, (\tau \Lambda_0)^{-1}) \cdot \mathrm{Gam}(\tau; a_0, b_0)
+\end{equation}
+
+which can be split into a conditional distribution and a marginal distribution
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:GLM-NG-prior-pdf}
+\begin{split}
+p(\beta|\tau) &= \mathrm{N}(\beta; \mu_0, (\tau \Lambda_0)^{-1}) = \sqrt{\frac{|\tau \Lambda_0|}{(2 \pi)^p}} \exp\left[ -\frac{\tau}{2} (\beta-\mu_0)^T \Lambda_0 (\beta-\mu_0) \right] \\
+p(\tau) &= \mathrm{Gam}(\tau; a_0, b_0) = \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \tau^{a_0-1} \exp[-b_0 \tau]
+\end{split}
+\end{equation}
+
+where $\mu_0$ and $\Lambda_0$ are the prior mean and the prior precision of $\beta$ and $a_0$ and $b_0$ are the prior shape and rate parameters for $\tau$.
+
+
+\subsection{Joint likelihood} \label{sec:GLM-NG-JL}
+
+Combining the likelihood function (\ref{eq:GLM-LF-Bayes}) with the prior distribution (\ref{eq:GLM-NG-prior-pdf}), the \textit{joint likelihood function} of the general linear model with normal-gamma priors (GLM-NG) becomes
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:GLM-NG-JL1}
+\begin{split}
+p(y,\beta,\tau) = \; & p(y|\beta,\tau) \, p(\beta,\tau) = p(y|\beta,\tau) \, p(\beta|\tau) \, p(\tau) \\
+= \; & \sqrt{\frac{|\tau P|}{(2 \pi)^n}} \, \exp\left[ -\frac{\tau}{2} (y-X\beta)^T P (y-X\beta) \right] \cdot \\
+& \sqrt{\frac{|\tau \Lambda_0|}{(2 \pi)^p}} \, \exp\left[ -\frac{\tau}{2} (\beta-\mu_0)^T \Lambda_0 (\beta-\mu_0) \right] \cdot \\
+& \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \tau^{a_0-1} \exp[-b_0 \tau] \; .
+\end{split}
+\end{equation}
+
+Collecting identical variables gives:
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:GLM-NG-JL2}
+\begin{split}
+p(y,\beta,\tau) = \; & \sqrt{\frac{\tau^{n+p}}{(2 \pi)^{n+p}} |P| |\Lambda_0|} \, \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \tau^{a_0-1} \exp[-b_0 \tau] \cdot \\
+& \exp\left[ -\frac{\tau}{2} \left( (y-X\beta)^T P (y-X\beta) + (\beta-\mu_0)^T \Lambda_0 (\beta-\mu_0) \right) \right] \; .
+\end{split}
+\end{equation}
+
+\pagebreak
+Completing the square over $\beta$ gives:
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:GLM-NG-JL3}
+\begin{split}
+p(y,\beta,\tau) = \; & \sqrt{\frac{\tau^{n+p}}{(2 \pi)^{n+p}} |P| |\Lambda_0|} \, \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \tau^{a_0-1} \exp[-b_0 \tau] \cdot \\
+& \exp\left[ -\frac{\tau}{2} \left( (\beta-\mu_n)^T \Lambda_n (\beta-\mu_n) + (y^T P y + \mu_0^T \Lambda_0 \mu_0 - \mu_n^T \Lambda_n \mu_n) \right) \right] \; .
+\end{split}
+\end{equation}
+
+
+\subsection{Posterior distribution} \label{sec:GLM-NG-post}
+
+The \textit{posterior distribution} in the GLM-NG can be evaluated using Bayes' theorem:
+
+\begin{equation} \label{eq:GLM-NG-BT}
+p(\beta,\tau|y) = \frac{p(y|\beta,\tau) \, p(\beta,\tau)}{p(y)} \; .
+\end{equation}
+
+Since $p(y)$ is just a normalization factor, the posterior is proportional to the joint:
+
+\begin{equation} \label{eq:GLM-NG-post}
+p(\beta,\tau|y) \propto p(y|\beta,\tau) \, p(\beta,\tau) = p(y,\beta,\tau) \; .
+\end{equation}
+
+From the term in (\ref{eq:GLM-NG-JL3}), we can isolate the posterior distribution over $\beta$:
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:GLM-NG-post-beta}
+\begin{split}
+p(\beta|\tau,y) &= \mathrm{N}(\beta; \mu_n, (\tau \Lambda_n)^{-1}) \\
+\mu_n &= \Lambda_n^{-1} (X^T P y + \Lambda_0 \mu_0) \\
+\Lambda_n &= X^T P X + \Lambda_0 \; .
+\end{split}
+\end{equation}
+
+From the remaining term, we can isolate the posterior distribution over $\tau$:
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:GLM-NG-post-tau}
+\begin{split}
+p(\tau|y) &= \mathrm{Gam}(\tau; a_n, b_n) \\
+a_n &= a_0 + \frac{n}{2} \\
+b_n &= b_0 + \frac{1}{2} (y^T P y + \mu_0^T \Lambda_0 \mu_0 - \mu_n^T \Lambda_n \mu_n) \; .
+\end{split}
+\end{equation}
+
+
+\subsection{Log model evidence} \label{sec:GLM-NG-LME}
+
+According to the law of marginal probability, the \textit{model evidence} of the GLM-NG is:
+
+\begin{equation} \label{eq:GLM-NG-ME1}
+p(y|m) = \iint p(y|\beta,\tau) \, p(\beta|\tau) \, p(\tau) \, \mathrm{d}\beta \, \mathrm{d}\tau \; .
+\end{equation}
+
+According to the law of conditional probability, the integrand is equivalent to the joint:
+
+\begin{equation} \label{eq:GLM-NG-ME2}
+p(y|m) = \iint p(y,\beta,\tau) \, \mathrm{d}\beta \, \mathrm{d}\tau \; .
+\end{equation}
+
+\pagebreak
+In (\ref{eq:GLM-NG-JL3}), we have already evaluated this term as
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:GLM-NG-LME1}
+\begin{split}
+p(y,\beta,\tau) = \; & \sqrt{\frac{\tau^n |P|}{(2 \pi)^n}} \, \sqrt{\frac{\tau^p |\Lambda_0|}{(2 \pi)^p}} \, \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \tau^{a_0-1} \exp[-b_0 \tau] \cdot \\
+& \exp\left[ -\frac{\tau}{2} \left( (\beta-\mu_n)^T \Lambda_n (\beta-\mu_n) + (y^T P y + \mu_0^T \Lambda_0 \mu_0 - \mu_n^T \Lambda_n \mu_n) \right) \right]
+\end{split}
+\end{equation}
+
+Using the posterior distribution over $\beta$, we can rewrite this as
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:GLM-NG-LME2}
+\begin{split}
+p(y,\beta,\tau) = \; & \sqrt{\frac{\tau^n |P|}{(2 \pi)^n}} \, \sqrt{\frac{\tau^p |\Lambda_0|}{(2 \pi)^p}} \, \sqrt{\frac{(2 \pi)^p}{\tau^p |\Lambda_n|}} \, \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \tau^{a_0-1} \exp[-b_0 \tau] \cdot \\
+& \mathrm{N}(\beta; \mu_n, (\tau \Lambda_n)^{-1}) \, \exp\left[ -\frac{\tau}{2} (y^T P y + \mu_0^T \Lambda_0 \mu_0 - \mu_n^T \Lambda_n \mu_n) \right]
+\end{split}
+\end{equation}
+
+Now, $\beta$ can be integrated out easily:
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:GLM-NG-LME3}
+\begin{split}
+\int p(y,\beta,\tau) \, \mathrm{d}\beta = \; & \sqrt{\frac{\tau^n |P|}{(2 \pi)^n}} \, \sqrt{\frac{|\Lambda_0|}{|\Lambda_n|}} \, \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \tau^{a_0-1} \exp[-b_0 \tau] \cdot \\
+& \exp\left[ -\frac{\tau}{2} (y^T P y + \mu_0^T \Lambda_0 \mu_0 - \mu_n^T \Lambda_n \mu_n) \right]
+\end{split}
+\end{equation}
+
+Using the posterior distribution over $\tau$, we can rewrite this as
+
+\begin{equation} \label{eq:GLM-NG-LME4}
+\int p(y,\beta,\tau) \, \mathrm{d}\beta = \; \sqrt{\frac{|P|}{(2 \pi)^n}} \, \sqrt{\frac{|\Lambda_0|}{|\Lambda_n|}} \, \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \frac{\Gamma(a_n)}{{b_n}^{a_n}} \, \mathrm{Gam}(\tau; a_n, b_n)
+\end{equation}
+
+Finally, $\tau$ can also be integrated out:
+
+\begin{equation} \label{eq:GLM-NG-LME5}
+\iint p(y,\beta,\tau) \, \mathrm{d}\beta \, \mathrm{d}\tau = \; \sqrt{\frac{|P|}{(2 \pi)^n}} \, \sqrt{\frac{|\Lambda_0|}{|\Lambda_n|}} \, \frac{\Gamma(a_n)}{\Gamma(a_0)} \, \frac{{b_0}^{a_0}}{{b_n}^{a_n}} = p(y|m)
+\end{equation}
+
+Thus, the \textit{log model evidence} of the GLM-NG is given by
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:GLM-NG-LME6}
+\begin{split}
+\log p(y|m) = \frac{1}{2} & \log |P| - \frac{n}{2} \log (2 \pi)  + \frac{1}{2} \log |\Lambda_0| - \frac{1}{2} \log |\Lambda_n| + \\ & \log \Gamma(a_n) - \log \Gamma(a_0) + a_0 \log b_0 - a_n \log b_n
+\end{split}
+\end{equation}
+
+
+\pagebreak
+\subsection{Cross-validated LME} \label{sec:GLM-NG-cvLME}
+
+For calculation of the \textit{cross-validated log model evidence} (cvLME), the data are splitted into $S$ subsets. In the training phase, all except one subset of the data are analyzed using a non-informative prior $p_\mathrm{ni}(\beta, \tau)$ with the prior parameters
+
+\begin{equation} \label{eq:GLM-NG-prior-ni}
+\mu_0 = 0_{p}, \; \Lambda_0 = 0_{pp} \quad \text{and} \quad a_0 = 0, \; b_0 = 0
+\end{equation}
+
+to obtain an informative posterior $p(\beta, \tau|\cup_{j \neq i} y_j)$ using equations (\ref{eq:GLM-NG-post-beta}) and (\ref{eq:GLM-NG-post-tau}). In the testing phase, this informative posterior is then applied as a prior distribution to obtain the out-of-sample log model evidence $\log p(y_i|\cup_{j \neq i} y_j)$ via equation (\ref{eq:GLM-NG-LME6}). Summing up over data subsets yields the cvLME according to equation (\ref{eq:cvLME}).
+
+As one can see from equations (\ref{eq:GLM-NG-post-beta}) and (\ref{eq:GLM-NG-post-tau}), the priors in (\ref{eq:GLM-NG-prior-ni}) are non-informative in the sense that only the data remain to influence the posteriors.
+
+
+\subsection{Special cases} \label{sec:GLM-NG-spec}
+
+The \textit{univariate Gaussian with unknown variance} (UGuv) is a special case in which
+
+\begin{equation} \label{eq:GLM-NG-UGuv}
+X = 1_n,  \quad \beta = \mu \quad \text{and} \quad P = I_n \; .
+\end{equation}
+
+Furthermore, \textit{simple linear regression} (SLR) is a special case of the GLM-NG where
+
+\begin{equation} \label{eq:GLM-NG-SLR}
+X = [1_n, x],  \quad \beta = [\beta_0, \beta_1]^T \quad \text{and} \quad V = I_n \; .
+\end{equation}
+
+The \textit{one-sample t-test}, the \textit{two-sample t-test}, the \textit{paired t-test} and the \textit{omnibus F-test} can all be emulated as comparisons of general linear models with specific design matrices.
+
+
+\subsection{Implementation} \label{sec:GLM-Imp}
+
+In \textbf{MATLAB}, maximum likelihood estimates and Bayesian posterior distributions can be obtained via the functions \verb|GLM_MLE| and \verb|GLM_Bayes| while log model evidence and cross-validated LME can be calculated using the functions \verb|GLM_LME| and \verb|GLM_cvLME|. Given an $n \times v$ data matrix $Y$, an $n \times p$ design matrix $X$, an $n \times n$ precision matrix $P$ and a number of data subsets $S$, the cvLME for a GLM-NG is calculated as
+
+\begin{equation} \label{eq:GLM-NG-cvLME-MATLAB}
+\texttt{cvLME = GLM\_cvLME(Y, X, P, S);}
+\end{equation}
+
+In \textbf{Python}, a GLM object has to be initiated via \verb|glm = cvBMS.GLM(Y, X, V)| and maximum likelihood estimates, Bayesian posterior distributions, log model evidence and cross-validated LME are evaluated via \verb|glm.MLE|, \verb|glm.Bayes|, \verb|glm.LME|, and \verb|glm.cvLME|. Given $Y$, $X$, $V$ and $S$ as above, the cvLME for a GLM-NG is calculated as
+
+\begin{equation} \label{eq:GLM-NG-cvLME-Python}
+\texttt{cvLME = cvBMS.GLM(Y, X, V).cvLME(S);}
+\end{equation}
+
+In all of the above, $V$ and $P$ default to $I_n$ whereas $S$ defaults to 2 when left empty.
