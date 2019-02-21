@@ -1,0 +1,79 @@
+\documentclass[a4paper,12pt]{article}
+
+%%% Packages %%%
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{gensymb}
+\usepackage{url}
+\usepackage{csquotes}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{natbib}
+\usepackage{setspace}
+\usepackage[utf8]{inputenc}
+\usepackage[bottom,hang,flushmargin]{footmisc}
+
+%%% Settings %%%
+\setlength{\parindent}{0pt}
+\frenchspacing
+\urlstyle{same}
+\MakeOuterQuote{"}
+\setlist{nolistsep}
+\setlist[itemize]{leftmargin=*}
+\setlist[enumerate]{leftmargin=*}
+\bibpunct{}{}{;}{a}{,}{,~}
+\renewcommand{\thefootnote}{\arabic{footnote}}
+
+
+\begin{document}
+
+
+%%% Title %%%
+\pagenumbering{roman}
+\vspace*{1em}
+\begin{center}
+	\Huge
+		\textbf{cvLME} \\
+		\vspace{1em}
+	\LARGE
+		A multi-language library to perform \\ cross-validated Bayesian model selection \\
+		\vspace{1em}
+	\Large
+		Joram Soch, BCCN Berlin \\
+		\vspace{1em}
+\end{center}
+
+
+
+%%% Info %%%
+\setstretch{1.5}
+\vspace{1em}
+\begin{center}
+	\begin{tabular}{l p{10.5cm}}
+		\textbf{Toolbox URL:} & \url{https://github.com/JoramSoch/cvLME} \\
+		\textbf{Support Contact:} & Joram Soch $\left\langle\right.$\url{joram.soch@bccn-berlin.de}$\left.\right\rangle$  \\
+		\textbf{Current Version:} & cvLME V0.1.1 \\
+		\textbf{Related Paper:} & Soch J, Allefeld C (2018). MACS -- a new SPM toolbox \linebreak[4]for model assessment, comparison and selection. \textit{Journal of \linebreak[4]Neuroscience Methods}, vol. 306, pp. 19-31; DOI: 10.1016/\linebreak[4]j.jneumeth.2018.05.017. \\
+	\end{tabular}
+\end{center}
+\vspace*{1em}
+
+
+
+%%% Contents %%%
+\pagebreak
+\setstretch{1.0}
+\tableofcontents
+
+
+
+%%% Text %%%
+\pagebreak
+\pagenumbering{arabic}
+\renewcommand\theequation{\thesection.\arabic{equation}}
+
+\include{MS}
+
+
+\end{document}

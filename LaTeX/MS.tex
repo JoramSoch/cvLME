@@ -1,0 +1,116 @@
+% Model spaces and model selection
+% 
+% Author: Joram Soch, BCCN Berlin
+% E-Mail: joram.soch@bccn-berlin.de
+% Edited: 21/02/2016, XX:XX
+
+
+\section{Model spaces and model selection} \label{sec:MS}
+
+\subsection{Log model evidence} \label{sec:MS-LME}
+
+A model space is defined as a set of models. In the context of these tools, a model space is always initialized with a set of \textit{log model evidences} (LME)
+
+\begin{equation} \label{eq:LME}
+\mathrm{LME}(m) = \log p(y|m) = \log \int p(y|\theta,m) \, p(\theta|m) \, \mathrm{d}\theta
+\end{equation}
+
+or \textit{cross-validated log model evidences} (cvLMEs)
+
+\begin{equation} \label{eq:cvLME}
+\mathrm{cvLME}(m) = \sum_{i=1}^S \log \int p(y_i|\theta,m) \, p(\theta|\cup_{j \neq i} y_j, m) \, \mathrm{d}\theta
+\end{equation}
+
+where $S$ is the number of data subsets.
+
+
+\subsection{Log Bayes factor} \label{sec:MS-LBF}
+
+The \textit{Bayes factor} (BF) is defined as the ratio of two model evidences,
+
+\begin{equation} \label{eq:BF}
+\mathrm{BF}_{12} = \frac{p(y|m_1)}{p(y|m_2)} \; ,
+\end{equation}
+
+such that the \textit{log Bayes factor} (LBF) is the difference of two log model evidences,
+
+\begin{equation} \label{eq:LBF}
+\mathrm{LBF}_{12} = \log \mathrm{BF}_{12} = \log \frac{p(y|m_1)}{p(y|m_2)} = \mathrm{LME}(m_1) - \mathrm{LME}(m_2) \; .
+\end{equation}
+
+
+\subsection{Posterior probabilities} \label{sec:MS-PPs}
+
+Given more than two models, one can also calculate \textit{posterior model probabilities} (PPs) by simply applying Bayes' theorem to the model evidences
+
+\begin{equation} \label{eq:PPs}
+p(m_i|y) = \frac{p(y|m_i) \, p(m_i)}{\sum_{j=1}^M p(y|m_j) \, p(m_j)}
+\end{equation}
+
+or, equivalently, to the exponentiated log model evidences (LME)
+
+\begin{equation} \label{eq:PPs-LME}
+p(m_i|y) = \frac{\exp[\mathrm{LME}(m_i)] \, p(m_i)}{\sum_{j=1}^M \exp[\mathrm{LME}(m_j)] \, p(m_j)}
+\end{equation}
+
+where $p(m_i)$ are prior model probabilities and $M$ is the number of models.
+
+\vspace{1em}
+Note that posterior probabilities do not on depend on absolute LME values, but only on relative LME difference. For this reason, the mean LME over models is subtracted from all LMEs before PPs are calculated.
+
+
+\pagebreak
+\subsection{Log family evidence} \label{sec:MS-LFE}
+
+The \textit{family evidence} (FE) is obtained by marginalizing over "model" within "family", i.e. as the marginal probability over the model evidences from all models within one family
+
+\begin{equation} \label{eq:FE}
+p(y|f) = \sum_{m \in f} p(y|m) \, p(m|f)
+\end{equation}
+
+and the \textit{log family evidence} (LFE) is the natural logarithm of this quantity
+
+\begin{equation} \label{eq:LFE}
+\mathrm{LFE}(f) = \log p(y|f) = \log \sum_{m \in f} p(y|m) \, p(m|f)
+\end{equation}
+
+where $p(m|f)$ is a (most likely uniform) within-family prior distribution.
+
+\vspace{1em}
+Note that, with a uniform within-family prior, the family evidence is the average of model evidences, but the log family evidence is not the average of the log model evidences! In particular, the problem is that we usually cannot access model evidences $p(y|m)$ directly, but only deal with log model evidences $\log p(y|m)$. LMEs are used to avoid computational problems with very small model evidences that could not be stored in standard computers, e.g. $p(y|m) = 10^{-100} \Rightarrow \log p(y|m) \approx -230$. However, just exponentiating LMEs does not work, because they often fall below a specific underflow threshold $-u$, e.g. $u = 745$, so that all model evidences would be $0$.
+
+The solution is to select the maximum LME within a family
+
+\begin{equation} \label{eq:LME-max}
+\mathrm{L}^{*}(f) = \max_{m \in f} \left[ \mathrm{LME}(m) \right]
+\end{equation}
+
+and define differences between LMEs and maximum LME as
+
+\begin{equation} \label{eq:LME-diff}
+\mathrm{L}'(m) = \mathrm{LME}(m) - \mathrm{L}^{*}(f) \; .
+\end{equation}
+
+Then, the log family evidence can be written as
+
+\begin{equation} \label{eq:LFE-alt}
+\mathrm{LFE}(f) = \log p(y|f) = \log \left[ \frac{1}{M_f} \sum_{i=1}^{M_f} \exp \left[ \mathrm{LME}(m_i) \right] \right]
+\end{equation}
+
+which can be further developed in the following way:
+
+\begin{equation} \label{eq:LFE-LME}
+\begin{split}
+\mathrm{LFE}(f) &= \log \left[ \frac{1}{M_f} \sum_{i=1}^{M_f} \exp \left[ \mathrm{L}'(m_i) + \mathrm{L}^{*}(f) \right] \right] \\
+&= \log \left[ \frac{1}{M_f} \exp \mathrm{L}^{*}(f) \sum_{i=1}^{M_f} \exp \mathrm{L}'(m_i) \right] \\
+&= \mathrm{L}^{*}(f) + \log \sum_{i=1}^{M_f} \exp \mathrm{L}'(m_i) - \log M_f \; .
+\end{split}
+\end{equation}
+
+
+\pagebreak
+\subsection{Implementation} \label{sec:MS-Imp}
+
+In \textbf{MATLAB}, (log) Bayes factors, posterior model probabilities and log family evidences are implemented via the functions \verb|MS_LBF|, \verb|MS_PP| and \verb|MS_LFE| which have to be called with an $M \times N$ matrix \verb|LME| as input.
+
+In \textbf{Python}, a model space object has to be initiated via \verb|ms = cvBMS.MS(LME)| and (log) Bayes factors, posterior model probabilities and log family evidences are calculated via \verb|ms.LBF|, \verb|ms.BF|, \verb|ms.PP|, and \verb|ms.LFE|.
