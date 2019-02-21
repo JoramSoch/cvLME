@@ -183,7 +183,7 @@ In (\ref{eq:GLM-NG-JL3}), we have already evaluated this term as
 \begin{equation} \label{eq:GLM-NG-LME1}
 \begin{split}
 p(y,\beta,\tau) = \; & \sqrt{\frac{\tau^n |P|}{(2 \pi)^n}} \, \sqrt{\frac{\tau^p |\Lambda_0|}{(2 \pi)^p}} \, \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \tau^{a_0-1} \exp[-b_0 \tau] \cdot \\
-& \exp\left[ -\frac{\tau}{2} \left( (\beta-\mu_n)^T \Lambda_n (\beta-\mu_n) + (y^T P y + \mu_0^T \Lambda_0 \mu_0 - \mu_n^T \Lambda_n \mu_n) \right) \right]
+& \exp\left[ -\frac{\tau}{2} \left( (\beta-\mu_n)^T \Lambda_n (\beta-\mu_n) + (y^T P y + \mu_0^T \Lambda_0 \mu_0 - \mu_n^T \Lambda_n \mu_n) \right) \right] \; .
 \end{split}
 \end{equation}
 
@@ -193,7 +193,7 @@ Using the posterior distribution over $\beta$, we can rewrite this as
 \begin{equation} \label{eq:GLM-NG-LME2}
 \begin{split}
 p(y,\beta,\tau) = \; & \sqrt{\frac{\tau^n |P|}{(2 \pi)^n}} \, \sqrt{\frac{\tau^p |\Lambda_0|}{(2 \pi)^p}} \, \sqrt{\frac{(2 \pi)^p}{\tau^p |\Lambda_n|}} \, \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \tau^{a_0-1} \exp[-b_0 \tau] \cdot \\
-& \mathrm{N}(\beta; \mu_n, (\tau \Lambda_n)^{-1}) \, \exp\left[ -\frac{\tau}{2} (y^T P y + \mu_0^T \Lambda_0 \mu_0 - \mu_n^T \Lambda_n \mu_n) \right]
+& \mathrm{N}(\beta; \mu_n, (\tau \Lambda_n)^{-1}) \, \exp\left[ -\frac{\tau}{2} (y^T P y + \mu_0^T \Lambda_0 \mu_0 - \mu_n^T \Lambda_n \mu_n) \right] \; .
 \end{split}
 \end{equation}
 
@@ -203,20 +203,20 @@ Now, $\beta$ can be integrated out easily:
 \begin{equation} \label{eq:GLM-NG-LME3}
 \begin{split}
 \int p(y,\beta,\tau) \, \mathrm{d}\beta = \; & \sqrt{\frac{\tau^n |P|}{(2 \pi)^n}} \, \sqrt{\frac{|\Lambda_0|}{|\Lambda_n|}} \, \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \tau^{a_0-1} \exp[-b_0 \tau] \cdot \\
-& \exp\left[ -\frac{\tau}{2} (y^T P y + \mu_0^T \Lambda_0 \mu_0 - \mu_n^T \Lambda_n \mu_n) \right]
+& \exp\left[ -\frac{\tau}{2} (y^T P y + \mu_0^T \Lambda_0 \mu_0 - \mu_n^T \Lambda_n \mu_n) \right] \; .
 \end{split}
 \end{equation}
 
 Using the posterior distribution over $\tau$, we can rewrite this as
 
 \begin{equation} \label{eq:GLM-NG-LME4}
-\int p(y,\beta,\tau) \, \mathrm{d}\beta = \; \sqrt{\frac{|P|}{(2 \pi)^n}} \, \sqrt{\frac{|\Lambda_0|}{|\Lambda_n|}} \, \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \frac{\Gamma(a_n)}{{b_n}^{a_n}} \, \mathrm{Gam}(\tau; a_n, b_n)
+\int p(y,\beta,\tau) \, \mathrm{d}\beta = \; \sqrt{\frac{|P|}{(2 \pi)^n}} \, \sqrt{\frac{|\Lambda_0|}{|\Lambda_n|}} \, \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \frac{\Gamma(a_n)}{{b_n}^{a_n}} \, \mathrm{Gam}(\tau; a_n, b_n) \; .
 \end{equation}
 
 Finally, $\tau$ can also be integrated out:
 
 \begin{equation} \label{eq:GLM-NG-LME5}
-\iint p(y,\beta,\tau) \, \mathrm{d}\beta \, \mathrm{d}\tau = \; \sqrt{\frac{|P|}{(2 \pi)^n}} \, \sqrt{\frac{|\Lambda_0|}{|\Lambda_n|}} \, \frac{\Gamma(a_n)}{\Gamma(a_0)} \, \frac{{b_0}^{a_0}}{{b_n}^{a_n}} = p(y|m)
+\iint p(y,\beta,\tau) \, \mathrm{d}\beta \, \mathrm{d}\tau = \; \sqrt{\frac{|P|}{(2 \pi)^n}} \, \sqrt{\frac{|\Lambda_0|}{|\Lambda_n|}} \, \frac{\Gamma(a_n)}{\Gamma(a_0)} \, \frac{{b_0}^{a_0}}{{b_n}^{a_n}} = p(y|m) \; .
 \end{equation}
 
 Thus, the \textit{log model evidence} of the GLM-NG is given by
@@ -224,7 +224,7 @@ Thus, the \textit{log model evidence} of the GLM-NG is given by
 \vspace{-0.5em}
 \begin{equation} \label{eq:GLM-NG-LME6}
 \begin{split}
-\log p(y|m) = \frac{1}{2} & \log |P| - \frac{n}{2} \log (2 \pi)  + \frac{1}{2} \log |\Lambda_0| - \frac{1}{2} \log |\Lambda_n| + \\ & \log \Gamma(a_n) - \log \Gamma(a_0) + a_0 \log b_0 - a_n \log b_n
+\log p(y|m) = \frac{1}{2} & \log |P| - \frac{n}{2} \log (2 \pi)  + \frac{1}{2} \log |\Lambda_0| - \frac{1}{2} \log |\Lambda_n| + \\ & \log \Gamma(a_n) - \log \Gamma(a_0) + a_0 \log b_0 - a_n \log b_n \; .
 \end{split}
 \end{equation}
 
@@ -243,7 +243,7 @@ to obtain an informative posterior $p(\beta, \tau|\cup_{j \neq i} y_j)$ using eq
 As one can see from equations (\ref{eq:GLM-NG-post-beta}) and (\ref{eq:GLM-NG-post-tau}), the priors in (\ref{eq:GLM-NG-prior-ni}) are non-informative in the sense that only the data remain to influence the posteriors.
 
 
-\subsection{Special cases} \label{sec:GLM-NG-spec}
+\subsection{Special cases} \label{sec:GLM-NG-Spec}
 
 The \textit{univariate Gaussian with unknown variance} (UGuv) is a special case in which
 

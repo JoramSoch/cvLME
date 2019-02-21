@@ -1,0 +1,190 @@
+% Poisson Distribution with Exposures
+% _
+% Author: Joram Soch, BCCN Berlin
+% E-Mail: joram.soch@bccn-berlin.de
+% Edited: 21/02/2019, 15:40
+
+
+\setcounter{equation}{0}
+\section{Poisson Distribution with Exposures} \label{sec:Poiss}
+
+\subsection{Likelihood function} \label{sec:Poiss-LF}
+
+Let $y = \left\lbrace y_1, \ldots, y_n \right\rbrace$ with $y_i \in \mathbb{N}$ be a series of observed \textit{counts} and let $x = \left\lbrace x_1, \ldots, x_n \right\rbrace$ with $x_i \in \mathbb{R}$ be a series of concurrent \textit{exposures}, some quantity that might or might not influence the measured counts. Then, according to a relatively simple model, each observation ($y$) would be Poisson-distributed with the Poisson rate being a product of the concurrent exposure ($x$) and some unknown constant ($\lambda$):
+
+\begin{equation} \label{eq:Poiss-yi}
+p(y_i|\lambda) = \mathrm{Poiss}(y_i; \lambda x_i) = \frac{(\lambda x_i)^{y_i} \cdot \exp[-\lambda x_i]}{y_i !} \; .
+\end{equation}
+
+Assuming independence between individual observations, i.e. factorization of individual likelihoods, this would imply the following \textit{likelihood function}:
+
+\begin{equation} \label{eq:Poiss-LF}
+p(y|\lambda) = \prod_{i=1}^n p(y_i|\lambda) = \prod_{i=1}^n \mathrm{Poiss}(y_i; \lambda x_i) = \prod_{i=1}^n \frac{(\lambda x_i)^{y_i} \cdot \exp[-\lambda x_i]}{y_i !} \; .
+\end{equation}
+
+\subsection{Maximum likelihood} \label{sec:Poiss-MLE}
+
+Classical model estimation proceeds by maximizing the \textit{log-likelihood} (LL)
+
+\begin{equation} \label{eq:Poiss-LL}
+\mathrm{LL}(\lambda) = \log p(y|\lambda) = \sum_{i=1}^n \left[ y_i \log(\lambda x_i) - \lambda x_i - \log \Gamma(y_i + 1) \right]
+\end{equation}
+
+which gives rise to \textit{maximum-likelihood} (ML) parameter estimates
+
+\begin{equation} \label{eq:Poiss-MLE}
+\hat{\lambda} = \frac{\sum_{i=1}^n y_i}{\sum_{i=1}^n x_i} = \frac{\bar{y}}{\bar{x}} \; .
+\end{equation}
+
+
+\subsection{Prior distribution} \label{sec:Poiss-prior}
+
+A conjugate prior distribution relative to the likelihood function given by (\ref{eq:Poiss-LF}) is the \textit{gamma distribution} over the Poisson rate $\lambda$ which is given by
+
+\begin{equation} \label{eq:Poiss-prior}
+p(\lambda) = \mathrm{Gam}(\lambda; a_0, b_0) = \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \lambda^{a_0-1} \exp[-b_0 \lambda]
+\end{equation}
+
+where $a_0$ and $b_0$ are the prior shape and rate parameters for $\lambda$.
+
+
+\subsection{Joint likelihood} \label{sec:Poiss-JL}
+
+Combining the likelihood function (\ref{eq:Poiss-LF}) with the prior distribution (\ref{eq:Poiss-prior}), the \textit{joint likelihood function} of the Poisson distribution with exposures (Poiss-exp) becomes
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:Poiss-JL1}
+\begin{split}
+p(y,\lambda) = \; & p(y|\lambda) \, p(\lambda) \\
+= \; & \prod_{i=1}^n \left( \frac{(\lambda x_i)^{y_i} \, \exp[-\lambda x_i]}{y_i !} \right) \cdot \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \lambda^{a_0-1} \exp[-b_0 \lambda] \; .
+\end{split}
+\end{equation}
+
+Multiplying out the product gives:
+
+\begin{equation} \label{eq:Poiss-JL2}
+p(y,\lambda) = \prod_{i=1}^n \left( \frac{x_i^{y_i}}{y_i !} \right) \, \lambda^{n \bar{y}} \, \exp[-n \bar{x} \lambda] \cdot \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \lambda^{a_0-1} \exp[-b_0 \lambda] \; .
+\end{equation}
+
+Collecting identical variables gives:
+
+\begin{equation} \label{eq:Poiss-JL3}
+p(y,\lambda) = \prod_{i=1}^n \left( \frac{x_i^{y_i}}{y_i !} \right) \, \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \lambda^{a_0 + n \bar{y} - 1} \, \exp[-(b_0 + n \bar{x}) \lambda] \; .
+\end{equation}
+
+
+\subsection{Posterior distribution} \label{sec:Poiss-post}
+
+The \textit{posterior distribution} of the Poisson can be evaluated using Bayes' theorem:
+
+\begin{equation} \label{eq:Poiss-BT}
+p(\lambda|y) = \frac{p(y|\lambda) \, p(\lambda)}{p(y)} \; .
+\end{equation}
+
+Since $p(y)$ is just a normalization factor, the posterior is proportional to the joint:
+
+\begin{equation} \label{eq:Poiss-post1}
+p(\lambda|y) \propto p(y|\lambda) \, p(\lambda) = p(y,\lambda) \; .
+\end{equation}
+
+From the term in (\ref{eq:Poiss-JL3}), we can isolate the posterior distribution over $\lambda$:
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:Poiss-post2}
+\begin{split}
+p(\lambda|y) &= \mathrm{Gam}(\lambda; a_n, b_n) \\
+a_n &= a_0 + n \bar{y} \\
+b_n &= b_0 + n \bar{x} \; .
+\end{split}
+\end{equation}
+
+Note that $\bar{y}$ and $\bar{x}$ are the averages of $y$ and $x$ and therefore $n \bar{y}$ and $n \bar{x}$ are the sums of all elements in $y$ and $x$, respectively.
+
+
+\subsection{Log model evidence} \label{sec:Poiss-LME}
+
+According to the law of marginal probability, the \textit{model evidence} of the Poisson is:
+
+\begin{equation} \label{eq:Poiss-ME1}
+p(y|m) = \int p(y|\lambda) \, p(\lambda) \, \mathrm{d}\lambda \; .
+\end{equation}
+
+According to the law of conditional probability, the integrand is equivalent to the joint:
+
+\begin{equation} \label{eq:Poiss-ME2}
+p(y|m) = \int p(y,\lambda) \, \mathrm{d}\lambda \; .
+\end{equation}
+
+In (\ref{eq:Poiss-JL3}), we have already evaluated this term as
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:Poiss-LME1}
+\begin{split}
+p(y,\lambda) = \prod_{i=1}^n \left( \frac{x_i^{y_i}}{y_i !} \right) \, \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \lambda^{a_0 + n \bar{y} - 1} \, \exp[-(b_0 + n \bar{x}) \lambda] \; .
+\end{split}
+\end{equation}
+
+\pagebreak
+Using the posterior distribution over $\lambda$, we can rewrite this as
+
+\begin{equation} \label{eq:Poiss-LME2}
+p(y,\lambda) = \prod_{i=1}^n \left( \frac{x_i^{y_i}}{y_i !} \right) \, \frac{{b_0}^{a_0}}{\Gamma(a_0)} \, \frac{\Gamma(a_n)}{{b_n}^{a_n}} \, \mathrm{Gam}(\lambda; a_n, b_n) \; .
+\end{equation}
+
+Now, $\lambda$ can be integrated out easily:
+
+\begin{equation} \label{eq:Poiss-LME3}
+\int p(y,\lambda) \, \mathrm{d}\lambda = \prod_{i=1}^n \left( \frac{x_i^{y_i}}{y_i !} \right) \, \frac{{b_0}^{a_0}}{\Gamma(a_0)} = p(y|m) \; .
+\end{equation}
+
+Thus, the \textit{log model evidence} of the Poisson is given by
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:Poiss-LME4}
+\begin{split}
+\log p(y|m) = &\sum_{i=1}^n y_i \log(x_i) - \sum_{i=1}^n \log \Gamma(y_i + 1) + \\ 
+&\log \Gamma(a_n) - \log \Gamma(a_0) + a_0 \log b_0 - a_n \log b_n \; .
+\end{split}
+\end{equation}
+
+
+\subsection{Cross-validated LME} \label{sec:Poiss-cvLME}
+
+For calculation of the \textit{cross-validated log model evidence} (cvLME), the data are splitted into $S$ subsets. In the training phase, all except one subset of the data are analyzed using a non-informative prior $p_\mathrm{ni}(\lambda)$ with the prior parameters
+
+\begin{equation} \label{eq:Poiss-prior-ni}
+a_0 = 0 \quad \text{and} \quad b_0 = 0
+\end{equation}
+
+to obtain an informative posterior $p(\lambda|\cup_{j \neq i} y_j)$ using equation (\ref{eq:Poiss-post2}). In the testing phase, this informative posterior is then applied as a prior distribution to obtain the out-of-sample log model evidence $\log p(y_i|\cup_{j \neq i} y_j)$ via equation (\ref{eq:Poiss-LME4}). Summing up over data subsets yields the cvLME according to equation (\ref{eq:cvLME}).
+
+As one can see from equation (\ref{eq:Poiss-post2}), the priors in (\ref{eq:Poiss-prior-ni}) are non-informative in the sense that only the data remain to influence the posteriors.
+
+
+\subsection{Special cases} \label{sec:Poiss-Spec}
+
+The \textit{Poisson distribution without exposures} (Poiss) is a special case in which
+
+\begin{equation} \label{eq:Poiss-exp-Poiss}
+x = 1_n \; ,
+\end{equation}
+
+i.e. the exposures $x$ are constant and one, such that $\bar{x} = 1$ and $n \bar{x} = n$.
+
+
+\pagebreak
+\subsection{Implementation} \label{sec:Poiss-Imp}
+
+In \textbf{MATLAB}, maximum likelihood estimates and Bayesian posterior distributions can be obtained via the functions \verb|Poiss_MLE| and \verb|Poiss_Bayes| while log model evidence and cross-validated LME can be calculated using the functions \verb|Poiss_LME| and \verb|Poiss_cvLME|. Given an $n \times v$ data matrix $Y$, an $n \times 1$ design vector $x$ and a number of data subsets $S$, the cvLME for the Poisson is calculated as
+
+\begin{equation} \label{eq:Poiss-cvLME-MATLAB}
+\texttt{cvLME = Poiss\_cvLME(Y, x, S);}
+\end{equation}
+
+In \textbf{Python}, a Poisson object has to be initiated via \verb|poiss = cvBMS.Poiss(Y, x)| and maximum likelihood estimates, Bayesian posterior distributions, log model evidence and cross-validated LME are evaluated via \verb|poiss.MLE|, \verb|poiss.Bayes|, \verb|poiss.LME|, and \verb|poiss.cvLME|. Given $Y$, $x$ and $S$ as above, the cvLME for the Poisson is calculated as
+
+\begin{equation} \label{eq:Poisson-cvLME-Python}
+\texttt{cvLME = cvBMS.Poiss(Y, x).cvLME(S);}
+\end{equation}
+
+In all of the above, $x$ defaults to $1_n$ whereas $S$ defaults to 2 when left empty.

@@ -20,12 +20,13 @@ The general principles of the cvBMS unit are as follows:
   separately, but using the same model.
 
 So far, the following model structures are available:
-- MS  = model space; for general model selection operations
-- GLM = univariate general linear model; for linear regression
+- MS    = model space; for general model selection operations
+- GLM   = univariate general linear model; for linear regression
+- Poiss = Poisson distribution with exposures; for count data
 
 Author: Joram Soch, BCCN Berlin
 E-Mail: joram.soch@bccn-berlin.de
-Edited: 21/02/2019, 10:00
+Edited: 21/02/2019, 14:50
 """
 
 
@@ -54,7 +55,7 @@ class MS:
     def __init__(self, LME):
         """
         Initialize a Model Space
-        ms = MS(LME)
+        ms = cvBMS.MS(LME)
             LME   - an M x N array of LMEs
             ms    - a model space object
             o LME - the Mx N array of log model evidences
@@ -173,7 +174,7 @@ class GLM:
     def __init__(self, Y, X, V=None):
         """
         Initialize a General Linear Model
-        glm = GLM(Y, X, V)
+        glm = cvBMS.GLM(Y, X, V)
             Y   - an n x v data matrix of measured signals
             X   - an n x p design matrix of predictor variables
             V   - an n x n covariance matrix specifying correlations (default: I_n)
@@ -241,12 +242,12 @@ class GLM:
         (mn, Ln, an, bn) = glm.Bayes(m0, L0, a0, b0)
             m0 - a p x v vector (prior means of regression coefficients)
             L0 - a p x p matrix (prior precision of regression coefficients)
-            a0 - a 1 x 1 scalar (prior shape of inverse residual variance)
-            b0 - a 1 x v vector (prior rates of inverse residual variance)
+            a0 - a 1 x 1 scalar (prior shape of residual precision)
+            b0 - a 1 x v vector (prior rates of residual precision)
             mn - a p x v vector (posterior means of regression coefficients)
             Ln - a p x p matrix (posterior precision of regression coefficients)
-            an - a 1 x 1 scalar (posterior shape of inverse residual variance)
-            bn - a 1 x v vector (posterior rates of inverse residual variance)
+            an - a 1 x 1 scalar (posterior shape of residual precision)
+            bn - a 1 x v vector (posterior rates of residual precision)
         """
         
         # enlarge priors if required
@@ -273,11 +274,11 @@ class GLM:
         Log Model Evidence of General Linear Model with Normal-Gamma Priors
         LME = glm.LME(L0, a0, b0, Ln, an, bn)
             L0  - a p x p matrix (prior precision of regression coefficients)
-            a0  - a 1 x 1 scalar (prior shape of inverse residual variance)
-            b0  - a 1 x v vector (prior rate of inverse residual variance)
+            a0  - a 1 x 1 scalar (prior shape of residual precision)
+            b0  - a 1 x v vector (prior rate of residual precision)
             Ln  - a p x p matrix (posterior precision of regression coefficients)
-            an  - a 1 x 1 scalar (posterior shape of inverse residual variance)
-            bn  - a 1 x v vector (posterior rate of inverse residual variance)
+            an  - a 1 x 1 scalar (posterior shape of residual precision)
+            bn  - a 1 x v vector (posterior rate of residual precision)
             LME - a 1 x v vector of log model evidences
         """
         
@@ -335,6 +336,143 @@ class GLM:
             m02 = mn1; L02 = Ln1; a02 = an1; b02 = bn1;
             mn2, Ln2, an2, bn2 = S2.Bayes(m02, L02, a02, b02)
             oosLME[j,:] = S2.LME(L02, a02, b02, Ln2, an2, bn2)
+            
+        # return cross-validated log model evidence
+        cvLME = np.sum(oosLME,0)
+        return cvLME
+    
+    
+###############################################################################
+# class: Poisson distribution                                                 #
+###############################################################################
+class Poiss:
+    """
+    The Poisson class allows to specify, estimate and assess basic Poisson
+    models which are defined by an n x 1 data vector y and an n x 1 design
+    vector of exposure values x.
+    
+    Edited: 13/02/2019, 07:25
+    """
+    
+    # initialize Poisson
+    #-------------------------------------------------------------------------#
+    def __init__(self, Y, x=None):
+        """
+        Initialize a Poisson Distribution
+        poiss = cvBMS.Poiss(Y, x)
+            Y     - an n x v data matrix of measured counts
+            x     - an n x 1 design vector of exposure values (default: 1_n)
+            poiss - a Poisson object
+            o Y - the n x v data matrix
+            o x - the n x 1 design vector
+            o n - the number of observations
+            o v - the number of instances
+        """
+        self.Y = Y                          # data matrix
+        if x is None:
+            x = np.ones(Y.shape[0])         # design vector
+        self.x = x
+        self.n = Y.shape[0]                 # number of observations
+        self.v = Y.shape[1]                 # number of instances
+        
+    # function: maximum likelihood estimation
+    #-------------------------------------------------------------------------#
+    def MLE(self):
+        """
+        Maximum Likelihood Estimation for Poisson Distribution
+        l_est = poiss.MLE()
+            l_est - a 1 x v vector of estimated Poisson rates
+        """
+        l_est = np.sum(self.Y,0)/np.sum(self.x)
+        return l_est
+    
+    # function: Bayesian estimation
+    #-------------------------------------------------------------------------#
+    def Bayes(self, a0, b0):
+        """
+        Bayesian Estimation of Poisson Distribution with Gamma Prior
+        (an, bn) = poiss.Bayes(a0, b0)
+            a0 - a 1 x v vector (prior shapes of the Poisson rates)
+            b0 - a 1 x 1 scalar (prior rate of the Poisson rates)
+            an - a 1 x v scalar (posterior shapes of the Poisson rates)
+            bn - a 1 x 1 vector (posterior rate of the Poisson rates)
+        """
+        
+        # enlarge priors if required
+        if np.isscalar(a0):
+            a0 = a0 * np.ones(self.v)
+        
+        # estimate posterior parameters
+        an = a0 + self.n * np.sum(self.Y,0)
+        bn = b0 + self.n * np.sum(self.x)
+        
+        # return posterior parameters
+        return an, bn
+    
+    # function: log model evidence
+    #-------------------------------------------------------------------------#
+    def LME(self, a0, b0, an, bn):
+        """
+        Log Model Evidence of Poisson Distribution with Gamma Prior
+        LME = poiss.LME(a0, b0, an, bn)
+            a0  - a 1 x v vector (prior shapes of the Poisson rates)
+            b0  - a 1 x 1 scalar (prior rate of the Poisson rates)
+            an  - a 1 x v scalar (posterior shapes of the Poisson rates)
+            bn  - a 1 x 1 vector (posterior rate of the Poisson rates)
+            LME - a 1 x v vector of log model evidences
+        """
+        
+        # calculate log model evidence
+        x   = np.reshape(self.x, (self.n, 1))
+        X   = np.tile(x, (1, self.v))
+        LME = np.sum(self.Y * np.log(X), 0) - np.sum(sp_special.gammaln(self.Y+1), 0) \
+            + sp_special.gammaln(an)        - sp_special.gammaln(a0)                  \
+            + a0 * np.log(b0)               - an * np.log(bn)
+        
+        # return log model evidence
+        return LME
+    
+    # function: cross-validated log model evidence
+    #-------------------------------------------------------------------------#
+    def cvLME(self, S=2):
+        """
+        Cross-Validated Log Model Evidence for Poisson Distribution
+        cvLME = poiss.cvLME(S)
+            S     - the number of subsets into which data are partitioned (default: 2)
+            cvLME - a 1 x v vector of cross-validated log model evidences
+        """
+        
+        # determine data partition
+        npS  = np.int(self.n/S);# number of data points per subset, truncated
+        inds = range(S*npS)     # indices for all data, without remainders
+        
+        # set non-informative priors
+        a0_ni = 0;
+        b0_ni = 0;
+        
+        # calculate out-of-sample log model evidences
+        #---------------------------------------------------------------------#
+        oosLME = np.zeros((S,self.v))
+        for j in range(S):
+            
+            # set indices
+            i2 = range(j*npS, (j+1)*npS)                # test indices
+            i1 = [i for i in inds if i not in i2]       # training indices
+            
+            # partition data
+            Y1 = self.Y[i1,:]                           # training data
+            x1 = self.x[i1]
+            S1 = Poiss(Y1, x1)
+            Y2 = self.Y[i2,:]                           # test data
+            x2 = self.x[i2]
+            S2 = Poiss(Y2, x2)
+            
+            # calculate oosLME
+            a01 = a0_ni; b01 = b0_ni;
+            an1, bn1 = S1.Bayes(a01, b01)
+            a02 = an1; b02 = bn1;
+            an2, bn2 = S2.Bayes(a02, b02)
+            oosLME[j,:] = S2.LME(a02, b02, an2, bn2)
             
         # return cross-validated log model evidence
         cvLME = np.sum(oosLME,0)
