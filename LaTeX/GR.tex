@@ -1,0 +1,83 @@
+% General remarks
+% _
+% Author: Joram Soch, BCCN Berlin
+% E-Mail: joram.soch@bccn-berlin.de
+% Edited: 01/03/2019, 14:XX
+
+
+\setcounter{section}{-1}
+\setcounter{equation}{0}
+\section{General remarks} \label{sec:GR}
+
+\subsection{Mathematics} \label{sec:GR-Math}
+
+In the following sections, we are considering different model classes -- such as linear regression for continuous data (see Section~\ref{sec:GLM}) or a Poisson model for count data (see Section~\ref{sec:Poiss}). For each of these model classes -- except for the section on model comparison where only some measures of model selection are introduced (see Section~\ref{sec:MS}) --, we are going through several steps of mathematical derivation which are outlined here.
+
+\textbf{Step 1:} First, the likelihood function is specified,
+
+\begin{equation} \label{GR-LF}
+p(y|\theta,m) \; ,
+\end{equation}
+
+i.e. the probability of observing the data $y$, given a model $m$ and parameters $\theta$.
+
+\textbf{Step 2:} Second, the maximum likelihood estimates are derived,
+
+\begin{equation} \label{GR-MLE}
+\hat{\theta} = \operatorname*{arg\,max}_\theta \, \log p(y|\theta,m) \; ,
+\end{equation}
+
+i.e. those model parameters that maximize the log-likelihood function $\mathrm{LL}(\theta)$.
+
+\textbf{Step 3:} Third, a (conjugate) prior distribution is specified,
+
+\begin{equation} \label{GR-prior}
+p(\theta|m) \; ,
+\end{equation}
+
+i.e. a distribution over parameters that can be applied to the likelihood $p(y|\theta,m)$.
+
+\textbf{Step 4:} Then, the joint likelihood function is calculated,
+
+\begin{equation} \label{GR-JL}
+p(y,\theta|m) = p(y|\theta) \, p(\theta|m) \; ,
+\end{equation}
+
+i.e. the product of likelihood function and prior distribution over model parameters.
+
+\textbf{Step 5:} Then, the posterior distribution is obtained,
+
+\begin{equation} \label{GR-post}
+p(\theta|y,m) = \frac{p(y|\theta,m) \, p(\theta|m)}{p(y|m)} \propto p(y,\theta|m) \; ,
+\end{equation}
+
+i.e. a distribution over model parameters that is proportional to the joint likelihood.
+
+\textbf{Step 6:} Then, the log model evidence is derived,
+
+\begin{equation} \label{GR-LME}
+\mathrm{LME}(m) = \log \int p(y|\theta) \, p(\theta|m) \, \mathrm{d}\theta  = \log \frac{p(y|\theta,m) \, p(\theta|m)}{p(\theta|y,m)} \; ,
+\end{equation}
+
+i.e. the logarithm of the marginal likelihood, expected over the prior distribution.
+
+\textbf{Step 7:} Then, the cross-validated log model evidence is presented,
+
+\begin{equation} \label{eq:GR-cvLME}
+\mathrm{cvLME}(m) = \sum_{i=1}^S \log \int p(y_i|\theta,m) \, p(\theta|\cup_{j \neq i} y_j, m) \, \mathrm{d}\theta
+\end{equation}
+
+which basically consists in describing what kind of non-informative prior is used for obtaining the informative posterior from the training data in each cross-validation fold.
+
+\textbf{Steps 8 and 9:} Finally, special cases of each model class are considered and implementation in the different programming languages is described.
+
+
+\subsection{Implementation} \label{sec:Gen-Rem-Imp}
+
+The cross-validated log model evidence (cvLME; see eq. \ref{eq:GR-cvLME}) is implemented within several programming languages and the respective implementational details are described here. In what follows, \verb|<name-of-the-model-class>| is either "\verb|GLM|" or "\verb|Poiss|" (but more options are to follow in the future).
+
+\textbf{MATLAB:} In MATLAB, the different methods for each model class (maximum likelihood estimation, Bayesian estimation, log model evidence, cross-validated log model evidence) are implemented as different functions called "\verb|<name-of-the-model-class>_| \verb|MLE/Bayes/LME/cvLME.m|" and these functions can be directly called with variables representing quantities in the model, e.g. measured data or experimental design information. Often, some quantities can be left empty.
+
+\textbf{Python:} In Python, all methods for all model classes are implemented as a single module called "\verb|cvBMS.py|" which can be simply imported at the beginning of a script using "\verb|import cvBMS|". Then, a particular model is intialized by calling "\verb|model = cvBMS.| \verb|<name-of-the-model-class>|" with variables representing model quantities. When a model has been initialized, statistical operations can be performed in object-oriented fashion by typing "\verb|model.MLE/Bayes/LME/cvLME()|" where sometimes, some more input variables can or must be provided.
+
+Further details are provided in the implementation subsections of each model class individually (see Sections~X.9).
