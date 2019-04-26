@@ -21,7 +21,7 @@ In this equation, $y$ is the $n \times 1$ measured signal, $X$ is the $n \times 
 The GLM equation (\ref{eq:GLM}) implies the following \textit{likelihood function}
 
 \begin{equation} \label{eq:GLM-LF-class}
-p(y|\beta,\sigma^2) = \mathrm{N}(y; X \beta, \sigma^2 V) = \sqrt{\frac{|\tau P|}{(2 \pi)^n}} \, \exp\left[ -\frac{\tau}{2} (y-X\beta)^T P (y-X\beta) \right]
+p(y|\beta,\sigma^2) = \mathrm{N}(y; X \beta, \sigma^2 V) = \sqrt{\frac{1}{(2 \pi)^n |\sigma^2 V|}} \, \exp\left[ -\frac{1}{2 \sigma^2} (y-X\beta)^T V^{-1} (y-X\beta) \right]
 \end{equation}
 
 which, for mathematical convenience, can also be parametrized as
@@ -38,7 +38,7 @@ using the residual precision $\tau = 1/\sigma^2$ and the $n \times n$ precision 
 Classical model estimation proceeds by maximizing the \textit{log-likelihood} (LL)
 
 \begin{equation} \label{eq:GLM-LL}
-\mathrm{LL}(\beta,\sigma^2) = \log p(y|\beta,\sigma^2) = - \frac{n}{2} \log(2\pi) - \frac{1}{2} \log \left| \sigma^2 V \right| - \frac{1}{2} (y - X\beta)^T (\sigma^2 V)^{-1} (y - X\beta)
+\mathrm{LL}(\beta,\sigma^2) = \log p(y|\beta,\sigma^2) = - \frac{n}{2} \log(2\pi) - \frac{1}{2} \log \left| \sigma^2 V \right| - \frac{1}{2 \sigma^2} (y - X\beta)^T V^{-1} (y - X\beta)
 \end{equation}
 
 which gives rise to \textit{maximum-likelihood} (ML) parameter estimates
