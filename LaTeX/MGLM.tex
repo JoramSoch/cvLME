@@ -1,0 +1,283 @@
+% Multivariate General Linear Model
+% _
+% Author: Joram Soch, BCCN Berlin
+% E-Mail: joram.soch@bccn-berlin.de
+% Edited: 21/07/2022, 13:50
+
+
+\setcounter{equation}{0}
+\section{Multivariate General Linear Model} \label{sec:MGLM}
+
+\subsection{Likelihood function} \label{sec:MGLM-LF}
+
+In the multivariate general linear model (MGLM), several measured signals ($Y$) are modelled as a linear combination ($B$) of predictor variables ($X$), where errors ($E$) are assumed to be normally distributed around zero and to have a known covariance across observations ($V$), but unknown covariance across measurements ($E$):
+
+\begin{equation} \label{eq:MGLM}
+Y = X B + E, \; E \sim \mathcal{MN}(0, V, \Sigma) \; .
+\end{equation}
+
+In this equation, $Y$ is the $n \times v$ data matrix, $X$ is the $n \times p$ design matrix, $B$ is a $p \times v$ matrix of regression coefficients, $E$ is an $n \times v$ matrix of errors, $V$ is an $n \times n$ correlation matrix and $\Sigma$ is a $v \times v$ covariance matrix where $n$ is the number of data points, $v$ is the number of measured variables and $p$ ist the number of regressors.
+
+The MGLM equation (\ref{eq:MGLM}) implies the following \textit{likelihood function}
+
+\begin{equation} \label{eq:MGLM-LF-class}
+\begin{split}
+p(Y|B,\Sigma) &= \mathcal{MN}(Y; XB, V, \Sigma) \\
+&= \sqrt{\frac{1}{(2\pi)^{nv} |\Sigma|^n |V|^v}} \exp\left[ -\frac{1}{2} \, \mathrm{tr}\left( \Sigma^{-1} (Y - XB)^\mathrm{T} V^{-1} (Y - XB) \right)  \right]
+\end{split}
+\end{equation}
+
+which, for mathematical convenience, can also be parametrized as
+
+\begin{equation} \label{eq:MGLM-LF-Bayes}
+\begin{split}
+p(Y|B,T) &= \mathcal{MN}(Y; X B, P, T^{-1}) \\
+&= \sqrt{\frac{|T|^n |P|^v}{(2 \pi)^{nv}}} \, \exp\left[ -\frac{1}{2} \mathrm{tr}\left( T (Y-XB)^\mathrm{T} P (Y-XB) \right) \right]
+\end{split}
+\end{equation}
+
+using the $v \times v$ precision matrix $T = \Sigma^{-1}$ and the $n \times n$ precision matrix $P = V^{-1}$.
+
+
+\subsection{Maximum likelihood} \label{sec:MGLM-MLE}
+
+Classical model estimation proceeds by maximizing the \textit{log-likelihood} (LL)
+
+\begin{equation} \label{eq:MGLM-LL}
+\begin{split}
+\mathrm{LL}(B,\Sigma) = \; &\log p(Y|B,\Sigma) \\
+= \; &- \frac{nv}{2} \log(2\pi) - \frac{n}{2} \log(|\Sigma|) - \frac{v}{2} \log(|V|) \\
+&- \frac{1}{2} \, \mathrm{tr}\left[ \Sigma^{-1} (Y - XB)^\mathrm{T} V^{-1} (Y - XB) \right] \; .
+\end{split}
+\end{equation}
+
+which gives rise to \textit{maximum-likelihood} (ML) parameter estimates
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:MGLM-MLE}
+\begin{split}
+\hat{B} &= (X^\mathrm{T} V^{-1} X)^{-1} X^\mathrm{T} V^{-1} Y \\
+\hat{\Sigma} &= \frac{1}{n} (Y - X\hat{B})^\mathrm{T} V^{-1} (Y - X\hat{B}) \; .
+\end{split}
+\end{equation}
+
+
+\subsection{Prior distribution} \label{sec:MGLM-NW-prior}
+
+A conjugate prior distribution relative to the likelihood function given by (\ref{eq:MGLM-LF-Bayes}) is the \textit{normal-Wishart distribution} over regression coefficients $B$ and noise precision $T$
+
+\begin{equation} \label{eq:MGLM-NW-prior}
+p(B,T) = \mathcal{MN}(B; M_0, \Lambda_0^{-1}, T^{-1}) \cdot \mathcal{W}(T; \Omega_0^{-1}, \nu_0)
+\end{equation}
+
+which can be split into a conditional distribution and a marginal distribution
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:MGLM-NW-prior-pdf}
+\begin{split}
+p(B|T) &= \sqrt{\frac{|T|^p |\Lambda_0|^v}{(2 \pi)^{pv}}} \, \exp\left[ -\frac{1}{2} \mathrm{tr}\left( T (B-M_0)^\mathrm{T} \Lambda_0 (B-M_0) \right) \right] \\
+p(T) &= \frac{1}{\Gamma_v \left( \frac{\nu_0}{2} \right)} \sqrt{\frac{|\Omega_0|^{\nu_0}}{2^{\nu_0 v}}} |T|^{(\nu_0-v-1)/2} \exp\left[ -\frac{1}{2} \mathrm{tr}\left( \Omega_0 T \right) \right]
+\end{split}
+\end{equation}
+
+where $M_0$ and $\Lambda_0$ are the prior mean and the prior precision of $B$ and $\Omega_0$ and $\nu_0$ are the prior inverse scale matrix and degrees of freedom for $T$.
+
+
+\subsection{Joint likelihood} \label{sec:MGLM-NW-JL}
+
+Combining the likelihood function (\ref{eq:MGLM-LF-Bayes}) with the prior distribution (\ref{eq:MGLM-NW-prior-pdf}), the \textit{joint likelihood function} of the multivariate general linear model with normal-Wishart priors (MGLM-NW) becomes
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:MGLM-NW-JL1}
+\begin{split}
+p(Y,B,T) = \; & p(Y|B,T) \, p(B,T) =  p(Y|B,T) \, p(B|T) \, p(T)\\
+= \; & \sqrt{\frac{|T|^n |P|^v}{(2 \pi)^{nv}}} \, \exp\left[ -\frac{1}{2} \mathrm{tr}\left( T (Y-XB)^\mathrm{T} P (Y-XB) \right) \right] \cdot \\
+& \sqrt{\frac{|T|^p |\Lambda_0|^v}{(2 \pi)^{pv}}} \, \exp\left[ -\frac{1}{2} \mathrm{tr}\left( T (B-M_0)^\mathrm{T} \Lambda_0 (B-M_0) \right) \right] \cdot \\
+& \frac{1}{\Gamma_v \left( \frac{\nu_0}{2} \right)} \sqrt{\frac{|\Omega_0|^{\nu_0}}{2^{\nu_0 v}}} |T|^{(\nu_0-v-1)/2} \exp\left[ -\frac{1}{2} \mathrm{tr}\left( \Omega_0 T \right) \right] \; .
+\end{split}
+\end{equation}
+
+Collecting identical variables gives:
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:MGLM-NW-JL2}
+\begin{split}
+p(Y,B,T) = \; & \sqrt{\frac{|T|^n |P|^v}{(2 \pi)^{nv}}} \sqrt{\frac{|T|^p |\Lambda_0|^v}{(2 \pi)^{pv}}} \sqrt{\frac{|\Omega_0|^{\nu_0}}{2^{\nu_0 v}}} \frac{1}{\Gamma_v \left( \frac{\nu_0}{2} \right)} \cdot |T|^{(\nu_0-v-1)/2} \exp\left[ -\frac{1}{2} \mathrm{tr}\left( \Omega_0 T \right) \right] \cdot \\
+& \exp\left[ -\frac{1}{2} \mathrm{tr}\left( T \left[ (Y-XB)^\mathrm{T} P (Y-XB) + (B-M_0)^\mathrm{T} \Lambda_0 (B-M_0) \right] \right) \right] \; .
+\end{split}
+\end{equation}
+
+\pagebreak
+Expanding the products in the exponent gives:
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:MGLM-NW-JL3}
+\begin{split}
+p(Y,B,T) = \; & \sqrt{\frac{|T|^n |P|^v}{(2 \pi)^{nv}}} \sqrt{\frac{|T|^p |\Lambda_0|^v}{(2 \pi)^{pv}}} \sqrt{\frac{|\Omega_0|^{\nu_0}}{2^{\nu_0 v}}} \frac{1}{\Gamma_v \left( \frac{\nu_0}{2} \right)} \cdot |T|^{(\nu_0-v-1)/2} \exp\left[ -\frac{1}{2} \mathrm{tr}\left( \Omega_0 T \right) \right] \cdot \\
+& \exp\left[ -\frac{1}{2} \mathrm{tr}\left( T \left[ Y^\mathrm{T} P Y - Y^\mathrm{T} P X B - B^\mathrm{T} X^\mathrm{T} P Y + B^\mathrm{T} X^\mathrm{T} P X B + \right. \right. \right. \\
+& \hphantom{\exp\left[ -\frac{1}{2} \mathrm{tr}\left( T \left[ \right. \right. \right. \!\!\!} \; \left. \left. \left. B^\mathrm{T} \Lambda_0 B - B^\mathrm{T} \Lambda_0 M_0 - M_0^\mathrm{T} \Lambda_0 B + M_0^\mathrm{T} \Lambda_0 \mu_0 \right] \right) \right] \; .
+\end{split}
+\end{equation}
+
+Completing the square over $B$ gives:
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:MGLM-NW-JL4}
+\begin{split}
+p(Y,B,T) = \; & \sqrt{\frac{|T|^n |P|^v}{(2 \pi)^{nv}}} \sqrt{\frac{|T|^p |\Lambda_0|^v}{(2 \pi)^{pv}}} \sqrt{\frac{|\Omega_0|^{\nu_0}}{2^{\nu_0 v}}} \frac{1}{\Gamma_v \left( \frac{\nu_0}{2} \right)} \cdot |T|^{(\nu_0-v-1)/2} \exp\left[ -\frac{1}{2} \mathrm{tr}\left( \Omega_0 T \right) \right] \cdot \\
+& \exp\left[ -\frac{1}{2} \mathrm{tr}\left( T \left[ (B-M_n)^\mathrm{T} \Lambda_n (B-M_n) + (Y^\mathrm{T} P Y + M_0^\mathrm{T} \Lambda_0 M_0 - M_n^\mathrm{T} \Lambda_n M_n) \right] \right) \right] \; .
+\end{split}
+\end{equation}
+
+
+\subsection{Posterior distribution} \label{sec:MGLM-NW-post}
+
+The \textit{posterior distribution} in the MGLM-NW can be evaluated using Bayes' theorem:
+
+\begin{equation} \label{eq:MGLM-NW-BT}
+p(B,T|Y) = \frac{p(Y|B,T) \, p(B,T)}{p(Y)} \; .
+\end{equation}
+
+Since $p(Y)$ is just a normalization factor, the posterior is proportional to the joint:
+
+\begin{equation} \label{eq:MGLM-NW-post-JL}
+p(B,T|Y) \propto p(Y|B,T) \, p(B,T) = p(Y,B,T) \; .
+\end{equation}
+
+From the term in (\ref{eq:MGLM-NW-JL4}), we can isolate the posterior distribution over $B$:
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:MGLM-NW-post-B}
+\begin{split}
+p(B|T,Y) &= \mathcal{MN}(B; M_n, \Lambda_n^{-1}, T^{-1}) \\
+M_n &= \Lambda_n^{-1} (X^\mathrm{T} P Y + \Lambda_0 M_0) \\
+\Lambda_n &= X^\mathrm{T} P X + \Lambda_0 \; .
+\end{split}
+\end{equation}
+
+From the remaining term, we can isolate the posterior distribution over $T$:
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:MGLM-NW-post-T}
+\begin{split}
+p(T|Y) &= \mathcal{W}(T; \Omega_n^{-1}, \nu_n) \\
+\Omega_n &= \Omega_0 + Y^\mathrm{T} P Y + M_0^\mathrm{T} \Lambda_0 M_0 - M_n^\mathrm{T} \Lambda_n M_n \\
+\nu_n &= \nu_0 + n \; .
+\end{split}
+\end{equation}
+
+
+\pagebreak
+\subsection{Log model evidence} \label{sec:MGLM-NW-LME}
+
+According to the law of marginal probability, the \textit{model evidence} of the MGLM-NW is:
+
+\begin{equation} \label{eq:MGLM-NW-ME1}
+p(Y|m) = \iint p(Y|B,T) \, p(B,T) \, \mathrm{d}B \, \mathrm{d}T \; .
+\end{equation}
+
+According to the law of conditional probability, the integrand is equivalent to the joint:
+
+\begin{equation} \label{eq:MGLM-NW-ME2}
+p(Y|m) = \iint p(Y,B,T) \, \mathrm{d}B \, \mathrm{d}T \; .
+\end{equation}
+
+In (\ref{eq:MGLM-NW-JL4}), we have already evaluated this term as
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:MGLM-NW-LME1}
+\begin{split}
+p(Y,B,T) = \; & \sqrt{\frac{|T|^n |P|^v}{(2 \pi)^{nv}}} \sqrt{\frac{|T|^p |\Lambda_0|^v}{(2 \pi)^{pv}}} \sqrt{\frac{|\Omega_0|^{\nu_0}}{2^{\nu_0 v}}} \frac{1}{\Gamma_v \left( \frac{\nu_0}{2} \right)} \cdot |T|^{(\nu_0-v-1)/2} \exp\left[ -\frac{1}{2} \mathrm{tr}\left( \Omega_0 T \right) \right] \cdot \\
+& \exp\left[ -\frac{1}{2} \mathrm{tr}\left( T \left[ (B-M_n)^\mathrm{T} \Lambda_n (B-M_n) + (Y^\mathrm{T} P Y + M_0^\mathrm{T} \Lambda_0 M_0 - M_n^\mathrm{T} \Lambda_n M_n) \right] \right) \right] \; .
+\end{split}
+\end{equation}
+
+Using the posterior distribution over $B$, we can rewrite this as
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:MGLM-NW-LME2}
+\begin{split}
+p(Y,B,T) = \; & \sqrt{\frac{|T|^n |P|^v}{(2 \pi)^{nv}}} \sqrt{\frac{|T|^p |\Lambda_0|^v}{(2 \pi)^{pv}}} \sqrt{\frac{(2 \pi)^{pv}}{|T|^p |\Lambda_n|^v}} \sqrt{\frac{|\Omega_0|^{\nu_0}}{2^{\nu_0 v}}} \frac{1}{\Gamma_v \left( \frac{\nu_0}{2} \right)} \cdot |T|^{(\nu_0-v-1)/2} \exp\left[ -\frac{1}{2} \mathrm{tr}\left( \Omega_0 T \right) \right] \cdot \\
+& \mathcal{MN}(B; M_n, \Lambda_n^{-1}, T^{-1}) \cdot \exp\left[ -\frac{1}{2} \mathrm{tr}\left( T \left[ Y^\mathrm{T} P Y + M_0^\mathrm{T} \Lambda_0 M_0 - M_n^\mathrm{T} \Lambda_n M_n \right] \right) \right] \; .
+\end{split}
+\end{equation}
+
+Now, $B$ can be integrated out easily:
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:MGLM-NW-LME3}
+\begin{split}
+\int p(Y,B,T) \, \mathrm{d}B = \; & \sqrt{\frac{|T|^n |P|^v}{(2 \pi)^{nv}}} \sqrt{\frac{|\Lambda_0|^v}{|\Lambda_n|^v}} \sqrt{\frac{|\Omega_0|^{\nu_0}}{2^{\nu_0 v}}} \frac{1}{\Gamma_v \left( \frac{\nu_0}{2} \right)} \cdot |T|^{(\nu_0-v-1)/2} \cdot \\
+& \exp\left[ -\frac{1}{2} \mathrm{tr}\left( T \left[ \Omega_0 + Y^\mathrm{T} P Y + M_0^\mathrm{T} \Lambda_0 M_0 - M_n^\mathrm{T} \Lambda_n M_n \right] \right) \right] \; .
+\end{split}
+\end{equation}
+
+Using the posterior distribution over $T$, we can rewrite this as
+
+\begin{equation} \label{eq:MGLM-NW-LME4}
+\int p(Y,B,T) \, \mathrm{d}B = \sqrt{\frac{|P|^v}{(2 \pi)^{nv}}} \sqrt{\frac{|\Lambda_0|^v}{|\Lambda_n|^v}} \sqrt{\frac{|\Omega_0|^{\nu_0}}{2^{\nu_0 v}}} \sqrt{\frac{2^{\nu_n v}}{|\Omega_n|^{\nu_n}}} \, \frac{\Gamma_v \left( \frac{\nu_n}{2} \right)}{\Gamma_v \left( \frac{\nu_0}{2} \right)} \cdot \mathcal{W}(T; \Omega_n^{-1}, \nu_n) \; .
+\end{equation}
+
+Finally, $T$ can also be integrated out:
+
+\begin{equation} \label{eq:MGLM-NW-LME5}
+\iint p(Y,B,T) \, \mathrm{d}B \, \mathrm{d}T = \sqrt{\frac{|P|^v}{(2 \pi)^{nv}}} \sqrt{\frac{|\Lambda_0|^v}{|\Lambda_n|^v}} \sqrt{\frac{\left| \frac{1}{2} \Omega_0 \right|^{\nu_0}}{\left| \frac{1}{2} \Omega_n \right|^{\nu_n}}} \, \frac{\Gamma_v \left( \frac{\nu_n}{2} \right)}{\Gamma_v \left( \frac{\nu_0}{2} \right)} = p(Y|m) \; .
+\end{equation}
+
+Thus, the \textit{log model evidence} of the MGLM-NW is given by
+
+\vspace{-0.5em}
+\begin{equation} \label{eq:MGLM-NW-LME6}
+\begin{split}
+\log p(Y|m) = & \frac{v}{2} \log |P| - \frac{nv}{2} \log (2 \pi)  + \frac{v}{2} \log |\Lambda_0| - \frac{v}{2} \log |\Lambda_n| + \\
+& \frac{\nu_0}{2} \log\left| \frac{1}{2} \Omega_0 \right| - \frac{\nu_n}{2} \log\left| \frac{1}{2} \Omega_n \right| + \log \Gamma_v \left( \frac{\nu_n}{2} \right) - \log \Gamma_v \left( \frac{\nu_0}{2} \right) \; .
+\end{split}
+\end{equation}
+
+
+\subsection{Cross-validated LME} \label{sec:MGLM-NW-cvLME}
+
+For calculation of the \textit{cross-validated log model evidence} (cvLME), the data are splitted into $S$ subsets. In the training phase, all except one subset of the data are analyzed using a non-informative prior $p_\mathrm{ni}(B,T)$ with the prior parameters
+
+\begin{equation} \label{eq:MGLM-NW-prior-ni}
+M_0 = 0_{pv}, \; \Lambda_0 = 0_{pp} \quad \text{and} \quad \Omega_0 = 0_{vv}, \; \nu_0 = 0
+\end{equation}
+
+to obtain an informative posterior $p(B,T|\cup_{j \neq i} y_j)$ using equations (\ref{eq:MGLM-NW-post-B}) and (\ref{eq:MGLM-NW-post-T}). In the testing phase, this informative posterior is then applied as a prior distribution to obtain the out-of-sample log model evidence $\log p(y_i|\cup_{j \neq i} y_j)$ via equation (\ref{eq:MGLM-NW-LME6}). Summing up over data subsets yields the cvLME according to equation (\ref{eq:cvLME}).
+
+As one can see from equations (\ref{eq:MGLM-NW-post-B}) and (\ref{eq:MGLM-NW-post-T}), the priors in (\ref{eq:MGLM-NW-prior-ni}) are non-informative in the sense that only the data remain to influence the posteriors.
+
+
+\subsection{Special cases} \label{sec:MGLM-NW-Spec}
+
+The \textit{univariate Gaussian with unknown variance} (UGuv) is a special case in which
+
+\begin{equation} \label{eq:MGLM-NW-UGuv}
+Y = y, \quad X = 1_n, \quad B = \mu, \quad \Sigma = \sigma^2 \quad \text{and} \quad V = I_n \; .
+\end{equation}
+
+Furthermore, \textit{multiple linear regression} (MLR) is a special case of the MGLM where
+
+\begin{equation} \label{eq:MGLM-NW-MLR}
+Y = y, \quad B = \beta \quad \text{and} \quad \Sigma = \sigma^2 \; .
+\end{equation}
+
+The \textit{one-sample t-test}, the \textit{two-sample t-test}, the \textit{paired t-test} and the \textit{omnibus F-test} can all be emulated as comparisons of general linear models with specific design matrices.
+
+
+\pagebreak
+\subsection{Implementation} \label{sec:MGLM-Imp}
+
+In \textbf{MATLAB}, maximum likelihood estimates and Bayesian posterior distributions can be obtained via the functions \verb|MGLM_MLE| and \verb|MGLM_Bayes| while log model evidence and cross-validated LME can be calculated using the functions \verb|MGLM_LME| and \verb|MGLM_cvLME|. Given an $n \times v$ data matrix $Y$, an $n \times p$ design matrix $X$, an $n \times n$ precision matrix $P$ and a number of data subsets $S$, the cvLME for a MGLM-NW is calculated as
+
+\begin{equation} \label{eq:MGLM-NW-cvLME-MATLAB}
+\texttt{cvLME = MGLM\_cvLME(Y, X, P, S);}
+\end{equation}
+
+In \textbf{Python}, an MGLM object has to be initiated via \verb|mglm = cvBMS.MGLM(Y, X, V)| and maximum likelihood estimates, Bayesian posterior distributions, log model evidence and cross-validated LME are evaluated via \verb|mglm.MLE|, \verb|mglm.Bayes|, \verb|mglm.LME|, and \verb|mglm.cvLME|. Given $Y$, $X$, $V$ and $S$ as above, the cvLME for a MGLM-NW is calculated as
+
+\begin{equation} \label{eq:MGLM-NW-cvLME-Python}
+\texttt{cvLME = cvBMS.MGLM(Y, X, V).cvLME(S)}
+\end{equation}
+
+In all of the above, $V$ and $P$ default to $I_n$ whereas $S$ defaults to 2 when left empty.

@@ -248,10 +248,10 @@ As one can see from equations (\ref{eq:GLM-NG-post-beta}) and (\ref{eq:GLM-NG-po
 The \textit{univariate Gaussian with unknown variance} (UGuv) is a special case in which
 
 \begin{equation} \label{eq:GLM-NG-UGuv}
-X = 1_n,  \quad \beta = \mu \quad \text{and} \quad P = I_n \; .
+X = 1_n,  \quad \beta = \mu \quad \text{and} \quad V = I_n \; .
 \end{equation}
 
-Furthermore, \textit{simple linear regression} (SLR) is a special case of the GLM-NG where
+Furthermore, \textit{simple linear regression} (SLR) is a special case of the GLM where
 
 \begin{equation} \label{eq:GLM-NG-SLR}
 X = [1_n, x],  \quad \beta = [\beta_0, \beta_1]^T \quad \text{and} \quad V = I_n \; .
@@ -271,7 +271,7 @@ In \textbf{MATLAB}, maximum likelihood estimates and Bayesian posterior distribu
 In \textbf{Python}, a GLM object has to be initiated via \verb|glm = cvBMS.GLM(Y, X, V)| and maximum likelihood estimates, Bayesian posterior distributions, log model evidence and cross-validated LME are evaluated via \verb|glm.MLE|, \verb|glm.Bayes|, \verb|glm.LME|, and \verb|glm.cvLME|. Given $Y$, $X$, $V$ and $S$ as above, the cvLME for a GLM-NG is calculated as
 
 \begin{equation} \label{eq:GLM-NG-cvLME-Python}
-\texttt{cvLME = cvBMS.GLM(Y, X, V).cvLME(S);}
+\texttt{cvLME = cvBMS.GLM(Y, X, V).cvLME(S)}
 \end{equation}
 
 In all of the above, $V$ and $P$ default to $I_n$ whereas $S$ defaults to 2 when left empty.
